@@ -1,0 +1,49 @@
+version: '3.8'
+
+services:
+  backend:
+    image: sujangg/meowcoin_backend:latest
+    container_name: meowcoin-backend
+    environment:
+      - NODE_ENV=production
+      - PORT=3001
+    networks:
+      - meowcoin-network
+    restart: unless-stopped
+    expose:
+      - "3001"
+
+  frontend:
+    image: sujangg/meowcoin_frontend:latest
+    container_name: meowcoin-frontend
+    environment:
+      - CHOKIDAR_USEPOLLING=true
+      - WATCHPACK_POLLING=true
+      - REACT_APP_API_URL=/api
+    depends_on:
+      - backend
+    networks:
+      - meowcoin-network
+    restart: unless-stopped
+    expose:
+      - "3000"
+
+  nginx:
+    image: sujangg/meowcoin_nginx:latest
+    container_name: meowcoin-nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    depends_on:
+      - backend
+      - frontend
+    networks:
+      - meowcoin-network
+    restart: unless-stopped
+
+networks:
+  meowcoin-network:
+    driver: bridge
+
+volumes:
+  db-data: 
